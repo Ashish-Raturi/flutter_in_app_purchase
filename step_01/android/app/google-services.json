@@ -1,0 +1,94 @@
+{
+  "project_info": {
+    "project_number": "1075396608526",
+    "firebase_url": "https://projects-497b2.firebaseio.com",
+    "project_id": "projects-497b2",
+    "storage_bucket": "projects-497b2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1075396608526:android:f90e3c53b012016298b25f",
+        "android_client_info": {
+          "package_name": "com.arApps.notes"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1075396608526-g0dt820c9rkmodg3pg20n4o7m7geckcv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.arApps.notes",
+            "certificate_hash": "ec942efb7d25515b07a70bd511f0d8f470c5be86"
+          }
+        },
+        {
+          "client_id": "1075396608526-hklq9prh1b3jqrjc4b36eqhbluoo4k3s.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.arApps.notes",
+            "certificate_hash": "26fc8b691a8dbb750ef06f11810f3ec5ec3a4cc0"
+          }
+        },
+        {
+          "client_id": "1075396608526-v9t7mklt3j85esjurl3gde3ecmlmof3f.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.arApps.notes",
+            "certificate_hash": "f84b0335a98a9b1d1cefc79ecdc503b7650511a9"
+          }
+        },
+        {
+          "client_id": "1075396608526-cic9mm4t4ipqj539va6oh45r562c8euu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBhx4lN8mmRMsIqYI0QLzJnb9gjnlsK4Bw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1075396608526-cic9mm4t4ipqj539va6oh45r562c8euu.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1075396608526:android:6ebd44bc9207783598b25f",
+        "android_client_info": {
+          "package_name": "com.arApps.pim"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1075396608526-cic9mm4t4ipqj539va6oh45r562c8euu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBhx4lN8mmRMsIqYI0QLzJnb9gjnlsK4Bw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1075396608526-cic9mm4t4ipqj539va6oh45r562c8euu.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      },
+      "admob_app_id": "ca-app-pub-5530559161010538~5373565588"
+    }
+  ],
+  "configuration_version": "1"
+}

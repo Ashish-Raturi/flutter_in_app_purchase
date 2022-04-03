@@ -1,4 +1,4 @@
-# stripe_subscription_app
+# pim
 
 A new Flutter project.
 

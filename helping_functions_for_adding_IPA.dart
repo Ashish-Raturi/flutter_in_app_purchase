@@ -11,6 +11,7 @@ class Homepage extends StatefulWidget {
   _HomepageState createState() => _HomepageState();
 }
 
+//------- Copy 01 -------//
 String _premiumProductId =
     Platform.isAndroid ? 'your_android_product_id' : 'your_ios_product_id';
 
@@ -21,8 +22,10 @@ List<String> _productIds = <String>[
   _premiumProductId,
   _gameCoinId,
 ];
+//----------------------//
 
 class _HomepageState extends State<Homepage> {
+  //------- Copy 02 -------//
   final InAppPurchase _inAppPurchase = InAppPurchase.instance;
   late StreamSubscription<List<PurchaseDetails>> _subscription;
   List<String> _notFoundIds = [];
@@ -104,12 +107,14 @@ class _HomepageState extends State<Homepage> {
     _subscription.cancel();
     super.dispose();
   }
+  //----------------------//
 
   @override
   Widget build(BuildContext context) {
     return Container();
   }
 
+  //------- Copy 03 -------//
   Card _buildConnectionCheckTile() {
     if (_loading) {
       return const Card(child: ListTile(title: Text('Trying to connect...')));
@@ -239,4 +244,5 @@ class _HomepageState extends State<Homepage> {
       }
     }
   }
+  //----------------------//
 }

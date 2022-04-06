@@ -12,13 +12,14 @@ class Homepage extends StatefulWidget {
 }
 
 String _premiumProductId =
-    Platform.isAndroid ? 'premium_plan' : 'your_ios_sub1_id';
+    Platform.isAndroid ? 'your_android_product_id' : 'your_ios_product_id';
 
-String _coinId = Platform.isAndroid ? 'game_coin' : 'your_ios_sub2_id';
+String _gameCoinId =
+    Platform.isAndroid ? 'your_android_gamecoin_id' : 'your_ios_gamecoin_id';
 
 List<String> _productIds = <String>[
   _premiumProductId,
-  _coinId,
+  _gameCoinId,
 ];
 
 class _HomepageState extends State<Homepage> {

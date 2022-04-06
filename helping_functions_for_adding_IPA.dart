@@ -1,8 +1,10 @@
+import 'package:flutter/material.dart';
+//------- Copy 01 -------//
 import 'dart:async';
 import 'dart:io';
-import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
+//----------------------//
 
 class Homepage extends StatefulWidget {
   const Homepage({Key? key}) : super(key: key);
@@ -11,7 +13,7 @@ class Homepage extends StatefulWidget {
   _HomepageState createState() => _HomepageState();
 }
 
-//------- Copy 01 -------//
+//------- Copy 02 -------//
 String _premiumProductId =
     Platform.isAndroid ? 'your_android_product_id' : 'your_ios_product_id';
 
@@ -25,7 +27,7 @@ List<String> _productIds = <String>[
 //----------------------//
 
 class _HomepageState extends State<Homepage> {
-  //------- Copy 02 -------//
+  //------- Copy 03 -------//
   final InAppPurchase _inAppPurchase = InAppPurchase.instance;
   late StreamSubscription<List<PurchaseDetails>> _subscription;
   List<String> _notFoundIds = [];
@@ -114,7 +116,7 @@ class _HomepageState extends State<Homepage> {
     return Container();
   }
 
-  //------- Copy 03 -------//
+  //------- Copy 04 -------//
   Card _buildConnectionCheckTile() {
     if (_loading) {
       return const Card(child: ListTile(title: Text('Trying to connect...')));

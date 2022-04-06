@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_in_app_purchase/color.dart';
 import 'package:flutter_in_app_purchase/service/user_db_service.dart';
+import 'dart:async';
+import 'dart:io';
+import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:in_app_purchase_android/in_app_purchase_android.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({Key? key}) : super(key: key);
@@ -9,9 +13,102 @@ class Homepage extends StatefulWidget {
   _HomepageState createState() => _HomepageState();
 }
 
+String _premiumProductId =
+    Platform.isAndroid ? 'premium_plan' : 'your_ios_product_id';
+
+String _gameCoinId = Platform.isAndroid ? 'game_coin' : 'your_ios_gamecoin_id';
+
+List<String> _productIds = <String>[
+  _premiumProductId,
+  _gameCoinId,
+];
+
 class _HomepageState extends State<Homepage> {
   int totalGameCoins = 0;
   bool isUserPremium = false;
+
+  final InAppPurchase _inAppPurchase = InAppPurchase.instance;
+  late StreamSubscription<List<PurchaseDetails>> _subscription;
+  List<ProductDetails> _products = [];
+  bool _isAvailable = false;
+  bool _loading = true;
+  //-------Use this fields------------//
+  List<String> _notFoundIds = [];
+  bool _purchasePending = false;
+  String? _queryProductError;
+  //---------------------------------//
+  @override
+  void initState() {
+    //step:1
+    final Stream<List<PurchaseDetails>> purchaseUpdated =
+        _inAppPurchase.purchaseStream;
+    _subscription = purchaseUpdated.listen((purchaseDetailsList) {
+      _listenToPurchaseUpdated(purchaseDetailsList);
+    }, onDone: () {
+      _subscription.cancel();
+    }, onError: (error) {});
+
+    //step: 2
+    initStoreInfo();
+    super.initState();
+  }
+
+  Future<void> initStoreInfo() async {
+    final bool isAvailable = await _inAppPurchase.isAvailable();
+    if (!isAvailable) {
+      setState(() {
+        _isAvailable = isAvailable;
+        _products = [];
+
+        _notFoundIds = [];
+        _purchasePending = false;
+        _loading = false;
+      });
+      return;
+    }
+
+    ProductDetailsResponse productDetailResponse =
+        await _inAppPurchase.queryProductDetails(_productIds.toSet());
+    if (productDetailResponse.error != null) {
+      setState(() {
+        _queryProductError = productDetailResponse.error!.message;
+        _isAvailable = isAvailable;
+        _products = productDetailResponse.productDetails;
+
+        _notFoundIds = productDetailResponse.notFoundIDs;
+        _purchasePending = false;
+        _loading = false;
+      });
+      return;
+    }
+
+    if (productDetailResponse.productDetails.isEmpty) {
+      setState(() {
+        _queryProductError = null;
+        _isAvailable = isAvailable;
+        _products = productDetailResponse.productDetails;
+
+        _notFoundIds = productDetailResponse.notFoundIDs;
+        _purchasePending = false;
+        _loading = false;
+      });
+      return;
+    }
+
+    setState(() {
+      _isAvailable = isAvailable;
+      _products = productDetailResponse.productDetails;
+      _notFoundIds = productDetailResponse.notFoundIDs;
+      _purchasePending = false;
+      _loading = false;
+    });
+  }
+
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,18 +145,28 @@ class _HomepageState extends State<Homepage> {
                                     style: const TextStyle(
                                         fontSize: 22,
                                         fontWeight: FontWeight.bold)),
+                                _buildRestoreButton()
                               ],
                             ),
+
+                            _buildConnectionCheckTile(),
                             const SizedBox(
                               height: 20,
                             ),
+
                             const Text('Get Premium',
                                 style: TextStyle(
                                     fontSize: 22, fontWeight: FontWeight.bold)),
                             const SizedBox(
                               height: 15,
                             ),
-                            _buildPremiumProductTile(),
+                            if (!_notFoundIds.contains(_premiumProductId) &&
+                                _queryProductError == null &&
+                                _isAvailable)
+                              _buildPremiumProductTile(),
+                            //
+                            if (_notFoundIds.contains(_premiumProductId))
+                              Text('$_premiumProductId Product Id not found'),
                             const SizedBox(
                               height: 20,
                             ),
@@ -72,11 +179,36 @@ class _HomepageState extends State<Homepage> {
                             const SizedBox(
                               height: 10,
                             ),
-                            _buildGameCoinTile(),
+                            if (!_notFoundIds.contains(_gameCoinId) &&
+                                _queryProductError == null &&
+                                _isAvailable)
+                              _buildGameCoinTile(),
+                            //
+                            if (_notFoundIds.contains(_gameCoinId))
+                              Text('$_gameCoinId Product Id not found'),
                           ],
                         ),
                       ),
                     ),
+                    if (_purchasePending)
+                      Container(
+                        width: double.maxFinite,
+                        height: double.maxFinite,
+                        color: Colors.black87,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: const [
+                            CircularProgressIndicator(),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Text(
+                              "Processing Purchase, Please wait...",
+                              style: TextStyle(color: Colors.white),
+                            )
+                          ],
+                        ),
+                      )
                   ],
                 )),
           );
@@ -84,6 +216,7 @@ class _HomepageState extends State<Homepage> {
   }
 
   _buildPremiumProductTile() {
+    ProductDetails pd = findProductDetail(_premiumProductId)!;
     return Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(14),
@@ -119,7 +252,8 @@ class _HomepageState extends State<Homepage> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Product title',
+                      Text(pd.title,
+                          // 'Product title',
                           style: const TextStyle(
                               color: Colors.white, fontSize: 16)),
                       const SizedBox(
@@ -129,7 +263,8 @@ class _HomepageState extends State<Homepage> {
                           text: TextSpan(
                               children: [
                             TextSpan(
-                                text: 'Price',
+                                text: pd.price,
+                                // 'Price',
                                 style: const TextStyle(
                                     fontSize: 30, color: Colors.white)),
                           ],
@@ -138,7 +273,8 @@ class _HomepageState extends State<Homepage> {
                       const SizedBox(
                         height: 5,
                       ),
-                      Text('Description',
+                      Text(pd.description,
+                          // 'Description',
                           style: TextStyle(color: c3, fontSize: 16)),
                     ],
                   ),
@@ -158,7 +294,9 @@ class _HomepageState extends State<Homepage> {
               height: 10,
             ),
             GestureDetector(
-              onTap: () {},
+              onTap: () {
+                if (isUserPremium == false) _buyProduct(pd);
+              },
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 decoration: BoxDecoration(
@@ -184,6 +322,7 @@ class _HomepageState extends State<Homepage> {
   }
 
   _buildGameCoinTile() {
+    ProductDetails pd = findProductDetail(_gameCoinId)!;
     return Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(14),
@@ -222,7 +361,9 @@ class _HomepageState extends State<Homepage> {
               height: 10,
             ),
             GestureDetector(
-              onTap: () async {},
+              onTap: () async {
+                await UserDbService().spendCoins(totalGameCoins);
+              },
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 decoration: BoxDecoration(
@@ -244,7 +385,9 @@ class _HomepageState extends State<Homepage> {
               height: 10,
             ),
             GestureDetector(
-              onTap: () {},
+              onTap: () {
+                _buyProduct(pd);
+              },
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 decoration: BoxDecoration(
@@ -267,5 +410,140 @@ class _HomepageState extends State<Homepage> {
             ),
           ],
         ));
+  }
+
+  Card _buildConnectionCheckTile() {
+    if (_loading) {
+      return const Card(child: ListTile(title: Text('Trying to connect...')));
+    }
+    final Widget storeHeader = ListTile(
+      leading: Icon(_isAvailable ? Icons.check : Icons.block,
+          color: _isAvailable ? Colors.green : ThemeData.light().errorColor),
+      title: Text(
+          'The store is ' + (_isAvailable ? 'available' : 'unavailable') + '.'),
+    );
+    final List<Widget> children = <Widget>[storeHeader];
+
+    if (!_isAvailable) {
+      children.addAll([
+        const Divider(),
+        ListTile(
+          title: Text('Not connected',
+              style: TextStyle(color: ThemeData.light().errorColor)),
+          subtitle: const Text('Unable to connect to the payments processor.'),
+        ),
+      ]);
+    }
+    return Card(child: Column(children: children));
+  }
+
+  ProductDetails? findProductDetail(String id) {
+    for (ProductDetails pd in _products) {
+      if (pd.id == id) return pd;
+    }
+    return null;
+  }
+
+  void _buyProduct(ProductDetails productDetails) async {
+    late PurchaseParam purchaseParam;
+
+    if (Platform.isAndroid) {
+      purchaseParam = GooglePlayPurchaseParam(
+          productDetails: productDetails,
+          applicationUserName: null,
+          changeSubscriptionParam: null);
+    } else {
+      purchaseParam = PurchaseParam(
+        productDetails: productDetails,
+        applicationUserName: null,
+      );
+    }
+    //buying consumable product
+    _inAppPurchase.buyConsumable(purchaseParam: purchaseParam);
+  }
+
+  Widget _buildRestoreButton() {
+    if (_loading) {
+      return Container();
+    }
+
+    return Padding(
+      padding: const EdgeInsets.all(4.0),
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          TextButton(
+            child: const Text('Restore purchases'),
+            style: TextButton.styleFrom(
+              backgroundColor: Theme.of(context).primaryColor,
+              primary: Colors.white,
+            ),
+            onPressed: () => _inAppPurchase.restorePurchases(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void showPendingUI() {
+    //Step: 1, case:1
+    setState(() {
+      _purchasePending = true;
+    });
+  }
+
+  void handleError(IAPError error) {
+    //Step: 1, case:2
+    setState(() {
+      _purchasePending = false;
+      showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+                title: const Text('Error'),
+                content: Text(error.details),
+                actions: [
+                  TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: const Text('ok'))
+                ],
+              ));
+    });
+  }
+
+  void verifyAndDeliverProduct(PurchaseDetails purchaseDetails) async {
+    //Step: 1, case:3
+    //Verify Purchase
+    // Deliver Product
+    if (purchaseDetails.productID == _premiumProductId) {
+      await UserDbService().convertUserToPremium(purchaseDetails);
+    } else if (purchaseDetails.productID == _gameCoinId) {
+      await UserDbService().getCoins(totalGameCoins);
+    }
+  }
+
+  void _listenToPurchaseUpdated(
+      List<PurchaseDetails> purchaseDetailsList) async {
+    for (var purchaseDetails in purchaseDetailsList) {
+      if (purchaseDetails.status == PurchaseStatus.pending) {
+        //Step: 1, case:1
+        showPendingUI();
+      } else {
+        if (purchaseDetails.status == PurchaseStatus.error) {
+          //Step: 1, case:2
+          handleError(purchaseDetails.error!);
+        } else if (purchaseDetails.status == PurchaseStatus.purchased ||
+            purchaseDetails.status == PurchaseStatus.restored) {
+          //Step: 1, case:3
+          verifyAndDeliverProduct(purchaseDetails);
+        }
+
+        if (purchaseDetails.pendingCompletePurchase) {
+          await _inAppPurchase.completePurchase(purchaseDetails);
+        }
+      }
+    }
   }
 }

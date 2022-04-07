@@ -4,20 +4,20 @@ export interface ProductData {
 }
 
 export const productDataMap: { [productId: string]: ProductData } = {
-  "your_android_sub1_id": {
-    productId: "your_android_sub1_id",
-    type: "SUBSCRIPTION",
+  "your_android_premium_product_id": {
+    productId: "your_android_premium_product_id",
+    type: "NON_SUBSCRIPTION",
   },
-  "your_android_sub2_id": {
-    productId: "your_android_sub2_id",
-    type: "SUBSCRIPTION",
+  "your_android_gold_coin_id": {
+    productId: "your_android_gold_coin_id",
+    type: "NON_SUBSCRIPTION",
   },
-  "your_ios_sub1_id": {
-    productId: "your_ios_sub1_id",
-    type: "SUBSCRIPTION",
+  "your_ios_premium_product_id": {
+    productId: "your_ios_premium_product_id",
+    type: "NON_SUBSCRIPTION",
   },
-  "your_ios_sub2_id": {
-    productId: "your_ios_sub2_id",
-    type: "SUBSCRIPTION",
+  "your_ios_gold_coin_id": {
+    productId: "your_ios_gold_coin_id",
+    type: "NON_SUBSCRIPTION",
   },
 };

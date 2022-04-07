@@ -40,14 +40,16 @@ class UserDataDbService {
         username: ds.get('username'));
   }
 
-  Future<void> increaseNoOfCoin(int totalCoins) async {
+  //increase total no of coins
+  Future<void> getCoins(int totalCoins) async {
     await _firestore
         .collection('User Data')
         .doc('a0STYJfcX2wLFMRpvipp')
         .set({'totalCoins': totalCoins + 5}, SetOptions(merge: true));
   }
 
-  Future<void> spendCoin(int totalCoins) async {
+  //decrease total no of coins
+  Future<void> spendCoins(int totalCoins) async {
     await _firestore
         .collection('User Data')
         .doc('a0STYJfcX2wLFMRpvipp')

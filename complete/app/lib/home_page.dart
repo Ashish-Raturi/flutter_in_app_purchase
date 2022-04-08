@@ -6,6 +6,7 @@ import 'package:flutter_in_app_purchase/color.dart';
 import 'package:flutter_in_app_purchase/service/user_db_service.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
+import 'package:in_app_purchase_storekit/store_kit_wrappers.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({Key? key}) : super(key: key);
@@ -477,6 +478,14 @@ class _HomepageState extends State<Homepage> {
     }
     //buying consumable product
     _inAppPurchase.buyConsumable(purchaseParam: purchaseParam);
+
+    //(for ios error) Flutter: storekit_duplicate_product_object : https://stackoverflow.com/questions/67367861/flutter-storekit-duplicate-product-object-there-is-a-pending-transaction-for-t
+    var transactions = await SKPaymentQueueWrapper().transactions();
+    transactions.forEach(
+      (skPaymentTransactionWrapper) {
+        SKPaymentQueueWrapper().finishTransaction(skPaymentTransactionWrapper);
+      },
+    );
   }
 
   Widget _buildRestoreButton() {

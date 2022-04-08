@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
+import 'package:in_app_purchase_storekit/store_kit_wrappers.dart';
 //----------------------//
 
 class Homepage extends StatefulWidget {
@@ -30,16 +31,18 @@ class _HomepageState extends State<Homepage> {
   //------- Copy 03 -------//
   final InAppPurchase _inAppPurchase = InAppPurchase.instance;
   late StreamSubscription<List<PurchaseDetails>> _subscription;
-  List<String> _notFoundIds = [];
   List<ProductDetails> _products = [];
   bool _isAvailable = false;
-  bool _purchasePending = false;
   bool _loading = true;
+  //-------Use this fields------------//
+  List<String> _notFoundIds = [];
+  bool _purchasePending = false;
   String? _queryProductError;
+  //----------------------------------//
 
   @override
   void initState() {
-    //step:1
+    //step: 01
     final Stream<List<PurchaseDetails>> purchaseUpdated =
         _inAppPurchase.purchaseStream;
     _subscription = purchaseUpdated.listen((purchaseDetailsList) {
@@ -48,7 +51,7 @@ class _HomepageState extends State<Homepage> {
       _subscription.cancel();
     }, onError: (error) {});
 
-    //step: 2
+    //step: 02
     initStoreInfo();
     super.initState();
   }
@@ -150,6 +153,7 @@ class _HomepageState extends State<Homepage> {
   }
 
   void _buyProduct(ProductDetails productDetails) async {
+    //step 03
     late PurchaseParam purchaseParam;
 
     if (Platform.isAndroid) {
@@ -165,6 +169,14 @@ class _HomepageState extends State<Homepage> {
     }
     //buying consumable product
     _inAppPurchase.buyConsumable(purchaseParam: purchaseParam);
+
+    //(for ios error) Flutter: storekit_duplicate_product_object : https://stackoverflow.com/questions/67367861/flutter-storekit-duplicate-product-object-there-is-a-pending-transaction-for-t
+    var transactions = await SKPaymentQueueWrapper().transactions();
+    transactions.forEach(
+      (skPaymentTransactionWrapper) {
+        SKPaymentQueueWrapper().finishTransaction(skPaymentTransactionWrapper);
+      },
+    );
   }
 
   Widget _buildRestoreButton() {
@@ -192,14 +204,14 @@ class _HomepageState extends State<Homepage> {
   }
 
   void showPendingUI() {
-    //Step: 1, case:1
+    //Step: 01, case: 01
     setState(() {
       _purchasePending = true;
     });
   }
 
   void handleError(IAPError error) {
-    //Step: 1, case:2
+    //Step: 01, case: 02
     setState(() {
       _purchasePending = false;
       showDialog(
@@ -219,7 +231,7 @@ class _HomepageState extends State<Homepage> {
   }
 
   void verifyAndDeliverProduct(PurchaseDetails purchaseDetails) async {
-    //Step: 1, case:3
+    //Step: 01, case: 03
     //Verify Purchase
     // Deliver Product
   }
@@ -228,15 +240,15 @@ class _HomepageState extends State<Homepage> {
       List<PurchaseDetails> purchaseDetailsList) async {
     for (var purchaseDetails in purchaseDetailsList) {
       if (purchaseDetails.status == PurchaseStatus.pending) {
-        //Step: 1, case:1
+        //Step: 01, case: 01
         showPendingUI();
       } else {
         if (purchaseDetails.status == PurchaseStatus.error) {
-          //Step: 1, case:2
+          //Step: 01, case: 02
           handleError(purchaseDetails.error!);
         } else if (purchaseDetails.status == PurchaseStatus.purchased ||
             purchaseDetails.status == PurchaseStatus.restored) {
-          //Step: 1, case:3
+          //Step: 01, case: 03
           verifyAndDeliverProduct(purchaseDetails);
         }
 

@@ -1,12 +1,11 @@
-import 'dart:async';
-import 'dart:io';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_in_app_purchase/color.dart';
 import 'package:flutter_in_app_purchase/service/user_db_service.dart';
+import 'dart:async';
+import 'dart:io';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
-import 'package:in_app_purchase_storekit/store_kit_wrappers.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({Key? key}) : super(key: key);
@@ -16,13 +15,13 @@ class Homepage extends StatefulWidget {
 }
 
 String _premiumProductId =
-    Platform.isAndroid ? 'premium_plan' : 'your_ios_sub1_id';
+    Platform.isAndroid ? 'premium_plan' : 'your_ios_product_id';
 
-String _coinId = Platform.isAndroid ? 'game_coin' : 'your_ios_sub2_id';
+String _gameCoinId = Platform.isAndroid ? 'game_coin' : 'your_ios_gamecoin_id';
 
 List<String> _productIds = <String>[
   _premiumProductId,
-  _coinId,
+  _gameCoinId,
 ];
 
 class _HomepageState extends State<Homepage> {
@@ -31,13 +30,14 @@ class _HomepageState extends State<Homepage> {
 
   final InAppPurchase _inAppPurchase = InAppPurchase.instance;
   late StreamSubscription<List<PurchaseDetails>> _subscription;
-  List<String> _notFoundIds = [];
   List<ProductDetails> _products = [];
   bool _isAvailable = false;
-  bool _purchasePending = false;
   bool _loading = true;
+  //-------Use this fields------------//
+  List<String> _notFoundIds = [];
+  bool _purchasePending = false;
   String? _queryProductError;
-
+  //---------------------------------//
   @override
   void initState() {
     //step:1
@@ -114,14 +114,15 @@ class _HomepageState extends State<Homepage> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<UserData>(
-        stream: UserDataDbService().featchUserDataFromDb,
+        stream: UserDbService().featchUserDataFromDb,
         builder: (context, snapshot) {
-          if (!snapshot.hasData) {
+          if (snapshot.hasData == false) {
             return const Scaffold(
                 body: Center(child: CircularProgressIndicator()));
           }
-          UserData userData = snapshot.data!;
-          totalGameCoins = userData.totalCoins;
+
+          UserData? userData = snapshot.data;
+          totalGameCoins = userData!.totalCoins;
           isUserPremium = userData.isUserPremium;
           return SafeArea(
             child: Scaffold(
@@ -137,7 +138,6 @@ class _HomepageState extends State<Homepage> {
                             const SizedBox(
                               height: 20,
                             ),
-
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -149,24 +149,25 @@ class _HomepageState extends State<Homepage> {
                                 _buildRestoreButton()
                               ],
                             ),
+
                             _buildConnectionCheckTile(),
                             const SizedBox(
                               height: 20,
                             ),
+
                             const Text('Get Premium',
                                 style: TextStyle(
                                     fontSize: 22, fontWeight: FontWeight.bold)),
                             const SizedBox(
                               height: 15,
                             ),
-                            if (_isAvailable &&
-                                !_notFoundIds.contains(_premiumProductId) &&
-                                _queryProductError == null)
-                              getPremium(),
+                            if (!_notFoundIds.contains(_premiumProductId) &&
+                                _queryProductError == null &&
+                                _isAvailable)
+                              _buildPremiumProductTile(),
+                            //
                             if (_notFoundIds.contains(_premiumProductId))
-                              Text('$_premiumProductId id not found'),
-                            if (_queryProductError != null)
-                              Text(_queryProductError!),
+                              Text('$_premiumProductId Product Id not found'),
                             const SizedBox(
                               height: 20,
                             ),
@@ -176,19 +177,16 @@ class _HomepageState extends State<Homepage> {
                             const SizedBox(
                               height: 10,
                             ),
-                            // const Text('\$2 Per Coin',
-                            //     style: TextStyle(fontWeight: FontWeight.bold)),
                             const SizedBox(
                               height: 10,
                             ),
-                            if (_isAvailable &&
-                                !_notFoundIds.contains(_coinId) &&
-                                _queryProductError == null)
-                              getGameCoin(),
-                            if (_notFoundIds.contains(_coinId))
-                              Text('$_coinId id not found'),
-                            if (_queryProductError != null)
-                              Text(_queryProductError!),
+                            if (!_notFoundIds.contains(_gameCoinId) &&
+                                _queryProductError == null &&
+                                _isAvailable)
+                              _buildGameCoinTile(),
+                            //
+                            if (_notFoundIds.contains(_gameCoinId))
+                              Text('$_gameCoinId Product Id not found'),
                           ],
                         ),
                       ),
@@ -216,6 +214,203 @@ class _HomepageState extends State<Homepage> {
                 )),
           );
         });
+  }
+
+  _buildPremiumProductTile() {
+    ProductDetails pd = findProductDetail(_premiumProductId)!;
+    return Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(14),
+          color: c1,
+        ),
+        width: MediaQuery.of(context).size.width - 40,
+        child: Column(
+          children: [
+            Container(
+                decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(14),
+                      topRight: Radius.circular(14)),
+                  color: c3,
+                ),
+                height: 35,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Icon(Icons.star_border, color: Colors.white, size: 18),
+                    SizedBox(
+                      width: 5,
+                    ),
+                    Text('Recommanded', style: TextStyle(color: Colors.white))
+                  ],
+                )),
+            Padding(
+              padding: const EdgeInsets.only(left: 20, top: 15, bottom: 15),
+              child: Row(
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(pd.title,
+                          // 'Product title',
+                          style: const TextStyle(
+                              color: Colors.white, fontSize: 16)),
+                      const SizedBox(
+                        height: 5,
+                      ),
+                      RichText(
+                          text: TextSpan(
+                              children: [
+                            TextSpan(
+                                text: pd.price,
+                                // 'Price',
+                                style: const TextStyle(
+                                    fontSize: 30, color: Colors.white)),
+                          ],
+                              style: const TextStyle(
+                                  fontSize: 16, color: Colors.white))),
+                      const SizedBox(
+                        height: 5,
+                      ),
+                      Text(pd.description,
+                          // 'Description',
+                          style: TextStyle(color: c3, fontSize: 16)),
+                    ],
+                  ),
+                  const Expanded(
+                    child: SizedBox(
+                      width: 5,
+                    ),
+                  ),
+                  Image.asset('assets/sub2.png', width: 100),
+                  const SizedBox(
+                    width: 25,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            GestureDetector(
+              onTap: () {
+                if (isUserPremium == false) _buyProduct(pd);
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: isUserPremium ? c4 : c2,
+                ),
+                width: 200,
+                alignment: Alignment.center,
+                child: Text(
+                  isUserPremium ? 'Active' : 'Get Premium',
+                  style: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w500),
+                ),
+              ),
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+          ],
+        ));
+  }
+
+  _buildGameCoinTile() {
+    ProductDetails pd = findProductDetail(_gameCoinId)!;
+    return Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(14),
+          color: c1,
+        ),
+        width: MediaQuery.of(context).size.width - 40,
+        child: Column(
+          children: [
+            Container(
+                height: 35,
+                decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(14),
+                      topRight: Radius.circular(14)),
+                  color: c3,
+                ),
+                width: double.maxFinite,
+                // padding:
+                //     const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                alignment: Alignment.center,
+                child: Text(
+                    '◯  Total Coins : ${totalGameCoins.toString().padLeft(2, "0")}',
+                    style: const TextStyle(color: Colors.white))),
+            const SizedBox(
+              height: 10,
+            ),
+            Wrap(children: [
+              for (int i = 0; i < totalGameCoins; i++)
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8.0, vertical: 5),
+                  child: Image.asset('assets/gold_coin_icon.png', width: 30),
+                ),
+            ]),
+            const SizedBox(
+              height: 10,
+            ),
+            GestureDetector(
+              onTap: () async {
+                await UserDbService().spendCoins(totalGameCoins);
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: c4,
+                ),
+                width: 200,
+                alignment: Alignment.center,
+                child: const Text(
+                  'Spend Coin',
+                  style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w500),
+                ),
+              ),
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            GestureDetector(
+              onTap: () {
+                _buyProduct(pd);
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: c2,
+                ),
+                width: 200,
+                alignment: Alignment.center,
+                child: const Text(
+                  'Get Coin',
+                  style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w500),
+                ),
+              ),
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+          ],
+        ));
   }
 
   Card _buildConnectionCheckTile() {
@@ -250,218 +445,6 @@ class _HomepageState extends State<Homepage> {
     return null;
   }
 
-  getPremium() {
-    ProductDetails? pd = findProductDetail(_premiumProductId);
-
-    if (pd == null) {
-      return const Text('Product Details Not found');
-    } else {
-      return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
-            color: c1,
-          ),
-          width: MediaQuery.of(context).size.width - 40,
-          child: Column(
-            children: [
-              Container(
-                  decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(14),
-                        topRight: Radius.circular(14)),
-                    color: c3,
-                  ),
-                  height: 35,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Icon(Icons.star_border, color: Colors.white, size: 18),
-                      SizedBox(
-                        width: 5,
-                      ),
-                      Text('Recommanded', style: TextStyle(color: Colors.white))
-                    ],
-                  )),
-              Padding(
-                padding: const EdgeInsets.only(left: 20, top: 15, bottom: 15),
-                child: Row(
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(pd.title,
-                            // 'Product title',
-                            style: const TextStyle(
-                                color: Colors.white, fontSize: 16)),
-                        const SizedBox(
-                          height: 5,
-                        ),
-                        RichText(
-                            text: TextSpan(
-                                children: [
-                              TextSpan(
-                                  text: pd.price,
-                                  // 'Price',
-                                  style: const TextStyle(
-                                      fontSize: 30, color: Colors.white)),
-                            ],
-                                style: const TextStyle(
-                                    fontSize: 16, color: Colors.white))),
-                        const SizedBox(
-                          height: 5,
-                        ),
-                        Text(pd.description,
-                            style: TextStyle(color: c3, fontSize: 16)),
-                      ],
-                    ),
-                    const Expanded(
-                      child: SizedBox(
-                        width: 5,
-                      ),
-                    ),
-                    Image.asset('assets/sub2.png', width: 100),
-                    const SizedBox(
-                      width: 25,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              GestureDetector(
-                onTap: () {
-                  if (!isUserPremium) _buyProduct(pd);
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    color: isUserPremium ? c4 : c2,
-                  ),
-                  width: 200,
-                  alignment: Alignment.center,
-                  child: _loading
-                      ? const CircularProgressIndicator()
-                      : Text(
-                          isUserPremium ? 'Active' : 'Get Premium',
-                          style: const TextStyle(
-                              fontSize: 16,
-                              color: Colors.black,
-                              fontWeight: FontWeight.w500),
-                        ),
-                ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-            ],
-          ));
-    }
-  }
-
-  getGameCoin() {
-    ProductDetails? pd = findProductDetail(_coinId);
-
-    if (pd == null) {
-      return const Text('Product Details Not found');
-    } else {
-      return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
-            color: c1,
-          ),
-          width: MediaQuery.of(context).size.width - 40,
-          child: Column(
-            children: [
-              Container(
-                  height: 35,
-                  decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(14),
-                        topRight: Radius.circular(14)),
-                    color: c3,
-                  ),
-                  width: double.maxFinite,
-                  // padding:
-                  //     const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  alignment: Alignment.center,
-                  child: Text(
-                      '◯  Total Coins : ${totalGameCoins.toString().padLeft(2, "0")}',
-                      style: const TextStyle(color: Colors.white))),
-              const SizedBox(
-                height: 10,
-              ),
-              Wrap(children: [
-                for (int i = 0; i < totalGameCoins; i++)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 8.0, vertical: 5),
-                    child: Image.asset('assets/gold_coin_icon.png', width: 30),
-                  ),
-              ]),
-              const SizedBox(
-                height: 10,
-              ),
-              GestureDetector(
-                onTap: () async {
-                  await UserDataDbService().spendCoins(totalGameCoins);
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    color: c4,
-                  ),
-                  width: 200,
-                  alignment: Alignment.center,
-                  child: _loading
-                      ? const CircularProgressIndicator()
-                      : const Text(
-                          'Spend Coin',
-                          style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.black,
-                              fontWeight: FontWeight.w500),
-                        ),
-                ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              GestureDetector(
-                onTap: () {
-                  _buyProduct(pd);
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    color: c2,
-                  ),
-                  width: 200,
-                  alignment: Alignment.center,
-                  child: _loading
-                      ? const CircularProgressIndicator()
-                      : const Text(
-                          'Get Coin',
-                          style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.black,
-                              fontWeight: FontWeight.w500),
-                        ),
-                ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-            ],
-          ));
-    }
-  }
-
   void _buyProduct(ProductDetails productDetails) async {
     late PurchaseParam purchaseParam;
 
@@ -478,14 +461,6 @@ class _HomepageState extends State<Homepage> {
     }
     //buying consumable product
     _inAppPurchase.buyConsumable(purchaseParam: purchaseParam);
-
-    //(for ios error) Flutter: storekit_duplicate_product_object : https://stackoverflow.com/questions/67367861/flutter-storekit-duplicate-product-object-there-is-a-pending-transaction-for-t
-    var transactions = await SKPaymentQueueWrapper().transactions();
-    transactions.forEach(
-      (skPaymentTransactionWrapper) {
-        SKPaymentQueueWrapper().finishTransaction(skPaymentTransactionWrapper);
-      },
-    );
   }
 
   Widget _buildRestoreButton() {
@@ -542,7 +517,6 @@ class _HomepageState extends State<Homepage> {
   void verifyAndDeliverProduct(PurchaseDetails purchaseDetails) async {
     //Step: 1, case:3
     //Verify Purchase
-    // bool purchaseVerified = false;
     HttpsCallable callable =
         FirebaseFunctions.instance.httpsCallable('verifyPurchase');
     HttpsCallableResult res = await callable.call({
@@ -552,14 +526,12 @@ class _HomepageState extends State<Homepage> {
       'verificationData':
           purchaseDetails.verificationData.serverVerificationData,
     });
-    print('Purchase verified : ${res.data}');
+    print(res.data);
     // Deliver Product
-    if (res.data) {
-      if (purchaseDetails.productID == _premiumProductId) {
-        await UserDataDbService().convertUserToPremium(purchaseDetails);
-      } else if (purchaseDetails.productID == _coinId) {
-        await UserDataDbService().getCoins(totalGameCoins);
-      }
+    if (purchaseDetails.productID == _premiumProductId) {
+      await UserDbService().convertUserToPremium(purchaseDetails);
+    } else if (purchaseDetails.productID == _gameCoinId) {
+      await UserDbService().getCoins(totalGameCoins);
     }
   }
 

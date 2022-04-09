@@ -4,12 +4,12 @@ export interface ProductData {
 }
 
 export const productDataMap: { [productId: string]: ProductData } = {
-  "your_android_premium_product_id": {
-    productId: "your_android_premium_product_id",
+  "premium_plan": {
+    productId: "premium_plan",
     type: "NON_SUBSCRIPTION",
   },
-  "your_android_gold_coin_id": {
-    productId: "your_android_gold_coin_id",
+  "game_coin": {
+    productId: "game_coin",
     type: "NON_SUBSCRIPTION",
   },
   "your_ios_premium_product_id": {

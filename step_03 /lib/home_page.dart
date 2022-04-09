@@ -1,3 +1,4 @@
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_in_app_purchase/color.dart';
 import 'package:flutter_in_app_purchase/service/user_db_service.dart';
@@ -516,6 +517,16 @@ class _HomepageState extends State<Homepage> {
   void verifyAndDeliverProduct(PurchaseDetails purchaseDetails) async {
     //Step: 1, case:3
     //Verify Purchase
+    HttpsCallable callable =
+        FirebaseFunctions.instance.httpsCallable('verifyPurchase');
+    HttpsCallableResult res = await callable.call({
+      'source': Platform.isAndroid ? 'google_play' : 'app_store',
+      'productId': purchaseDetails.productID,
+      'uid': 'a0STYJfcX2wLFMRpvipp',
+      'verificationData':
+          purchaseDetails.verificationData.serverVerificationData,
+    });
+    print(res.data);
     // Deliver Product
     if (purchaseDetails.productID == _premiumProductId) {
       await UserDbService().convertUserToPremium(purchaseDetails);

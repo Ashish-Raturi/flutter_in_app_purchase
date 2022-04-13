@@ -13,9 +13,10 @@ class Homepage extends StatefulWidget {
   _HomepageState createState() => _HomepageState();
 }
 
+//Non-Consumable
 String _premiumProductId =
     Platform.isAndroid ? 'premium_plan' : 'your_ios_product_id';
-
+//Consumable
 String _gameCoinId = Platform.isAndroid ? 'game_coin' : 'your_ios_gamecoin_id';
 
 List<String> _productIds = <String>[
@@ -128,68 +129,75 @@ class _HomepageState extends State<Homepage> {
                 backgroundColor: Colors.white,
                 body: Stack(
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 5),
-                      child: SingleChildScrollView(
+                    if (_loading == true)
+                      Center(
                         child: Column(
-                          children: [
-                            const SizedBox(
-                              height: 20,
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text('Hi, ${userData.username}',
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                        fontSize: 22,
-                                        fontWeight: FontWeight.bold)),
-                                _buildRestoreButton()
-                              ],
-                            ),
-
-                            _buildConnectionCheckTile(),
-                            const SizedBox(
-                              height: 20,
-                            ),
-
-                            const Text('Get Premium',
-                                style: TextStyle(
-                                    fontSize: 22, fontWeight: FontWeight.bold)),
-                            const SizedBox(
-                              height: 15,
-                            ),
-                            if (!_notFoundIds.contains(_premiumProductId) &&
-                                _queryProductError == null &&
-                                _isAvailable)
-                              _buildPremiumProductTile(),
-                            //
-                            if (_notFoundIds.contains(_premiumProductId))
-                              Text('$_premiumProductId Product Id not found'),
-                            const SizedBox(
-                              height: 20,
-                            ),
-                            const Text('Get Game Coin',
-                                style: TextStyle(
-                                    fontSize: 22, fontWeight: FontWeight.bold)),
-                            const SizedBox(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: const [
+                            CircularProgressIndicator(),
+                            SizedBox(
                               height: 10,
                             ),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            if (!_notFoundIds.contains(_gameCoinId) &&
-                                _queryProductError == null &&
-                                _isAvailable)
-                              _buildGameCoinTile(),
-                            //
-                            if (_notFoundIds.contains(_gameCoinId))
-                              Text('$_gameCoinId Product Id not found'),
+                            Text('Loading Purchase Details...')
                           ],
                         ),
                       ),
-                    ),
+                    if (_loading == false)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 5),
+                        child: SingleChildScrollView(
+                          child: Column(
+                            children: [
+                              const SizedBox(
+                                height: 20,
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text('Hi, ${userData.username}',
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                          fontSize: 22,
+                                          fontWeight: FontWeight.bold)),
+                                ],
+                              ),
+                              const SizedBox(
+                                height: 20,
+                              ),
+                              const Text('Get Premium',
+                                  style: TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold)),
+                              const SizedBox(
+                                height: 15,
+                              ),
+                              if (!_notFoundIds.contains(_premiumProductId) &&
+                                  _queryProductError == null)
+                                _buildPremiumProductTile(),
+                              const SizedBox(
+                                height: 20,
+                              ),
+                              const Text('Get Game Coin',
+                                  style: TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold)),
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              if (_queryProductError != null)
+                                Text(_queryProductError!),
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              if (!_notFoundIds.contains(_gameCoinId) &&
+                                  _queryProductError == null)
+                                _buildGameCoinTile(),
+                            ],
+                          ),
+                        ),
+                      ),
                     if (_purchasePending)
                       Container(
                         width: double.maxFinite,

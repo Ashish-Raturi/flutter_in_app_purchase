@@ -51,7 +51,7 @@ export const verifyPurchase = functions.https.onCall(
         console.warn("verifyPurchase called for an unknown source ()");
         return false;
       }
-      console.warn("calling apple veriifcation");
+      console.warn("calling veriifcation");
       // Process the purchase for the product
       return purchaseHandlers[data.source].verifyPurchase(
           data.uid,

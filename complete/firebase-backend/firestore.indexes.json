@@ -1,7 +1,7 @@
 {
   "indexes": [
     {
-      "collectionGroup": "purchases",
+      "collectionGroup": "purchases_detass",
       "queryScope": "COLLECTION",
       "fields": [
         {

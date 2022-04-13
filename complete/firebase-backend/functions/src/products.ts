@@ -16,8 +16,8 @@ export const productDataMap: { [productId: string]: ProductData } = {
     productId: "your_ios_premium_product_id",
     type: "NON_SUBSCRIPTION",
   },
-  "your_ios_gold_coin_id": {
-    productId: "your_ios_gold_coin_id",
+  "your_ios_game_coin_id": {
+    productId: "your_ios_game_coin_id",
     type: "NON_SUBSCRIPTION",
   },
 };

@@ -25,7 +25,7 @@ export class AppStorePurchaseHandler extends PurchaseHandler {
       verbose: false,
       secret: APP_STORE_SHARED_SECRET,
       extended: true,
-      environment: ["production"], // Optional, defaults to ['production'],
+      environment: ["sandbox"], // Optional, defaults to ['production'],
       excludeOldTransactions: true,
     });
   }

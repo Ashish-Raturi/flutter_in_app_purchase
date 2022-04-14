@@ -15,9 +15,11 @@ class Homepage extends StatefulWidget {
 }
 
 //------- Copy 02 -------//
+//Non-Consumable
 String _premiumProductId =
     Platform.isAndroid ? 'your_android_product_id' : 'your_ios_product_id';
 
+//Consumable
 String _gameCoinId =
     Platform.isAndroid ? 'your_android_gamecoin_id' : 'your_ios_gamecoin_id';
 

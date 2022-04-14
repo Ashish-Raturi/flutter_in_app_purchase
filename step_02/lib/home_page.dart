@@ -16,6 +16,7 @@ class Homepage extends StatefulWidget {
 //Non-Consumable
 String _premiumProductId =
     Platform.isAndroid ? 'premium_plan' : 'your_ios_product_id';
+
 //Consumable
 String _gameCoinId = Platform.isAndroid ? 'game_coin' : 'your_ios_gamecoin_id';
 
@@ -161,8 +162,10 @@ class _HomepageState extends State<Homepage> {
                                       style: const TextStyle(
                                           fontSize: 22,
                                           fontWeight: FontWeight.bold)),
+                                  _buildRestoreButton()
                                 ],
                               ),
+                              _buildConnectionCheckTile(),
                               const SizedBox(
                                 height: 20,
                               ),
@@ -174,7 +177,8 @@ class _HomepageState extends State<Homepage> {
                                 height: 15,
                               ),
                               if (!_notFoundIds.contains(_premiumProductId) &&
-                                  _queryProductError == null)
+                                  _queryProductError == null &&
+                                  _isAvailable)
                                 _buildPremiumProductTile(),
                               const SizedBox(
                                 height: 20,
@@ -192,7 +196,8 @@ class _HomepageState extends State<Homepage> {
                                 height: 10,
                               ),
                               if (!_notFoundIds.contains(_gameCoinId) &&
-                                  _queryProductError == null)
+                                  _queryProductError == null &&
+                                  _isAvailable)
                                 _buildGameCoinTile(),
                             ],
                           ),

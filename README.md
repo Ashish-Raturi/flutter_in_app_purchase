@@ -6,7 +6,7 @@ I'll tell you everything you need to know about **Flutter In App Purchase (Consu
 
 **For Verifying the purchase, No third party is needed, Just Firebase and your Flutter App.**
 
-COURSE LINK - https://www.udemy.com/course/learn-flutter-in-app-subscriptions-form-scratch/?referralCode=F70A0BD830C1E8FA3299
+[COURSE LINK](https://www.udemy.com/course/flutter-in-app-consumable-non-consumable-purchase-2022/?referralCode=4AEDA7F7245611FC42A0)
 
 --------------------------------------------------------------
 
@@ -14,7 +14,7 @@ UPTO 50% OFF (NEW USERS) FOR A LIMITED TIME
 
 CODE - NEW_USER_DISCOUNT
 
-LINK - https://www.udemy.com/course/draft/4635518/?couponCode=NEW_USER_DISCOUNT
+LINK - https://www.udemy.com/course/flutter-in-app-consumable-non-consumable-purchase-2022/?couponCode=NEW_USER_DISCOUNT
 
 --------------------------------------------------------------
 
